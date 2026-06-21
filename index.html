@@ -1,1 +1,67 @@
 
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Resmi Yazışma Bankası</title>
+<style>
+body{font-family:Arial;background:#eaf2ff;color:#222;margin:0}
+header{background:#0b5ed7;color:#fff;padding:15px}
+.container{padding:15px}
+textarea,select{width:100%;padding:10px;margin:8px 0}
+button{padding:10px 14px;margin:4px;background:#0b5ed7;color:#fff;border:0;border-radius:6px}
+.dark{background:#111;color:#eee}
+#loading{display:none}
+</style>
+</head>
+<body>
+<header><h2>Resmi Yazışma Bankası</h2></header>
+<div class="container">
+<select id="sablon">
+<option value="">Şablon Seç</option>
+<option>Tayin Dilekçesi</option>
+<option>Görev Talebi</option>
+</select>
+<textarea id="girdi" rows="8" placeholder="Belge isteğini yaz"></textarea>
+<button onclick="olustur()">Belge Oluştur</button>
+<button onclick="kopyala()">Kopyala</button>
+<button onclick="window.print()">Yazdır</button>
+<button onclick="temizle()">Temizle</button>
+<button onclick="tema()">Karanlık Tema</button>
+<button onclick="pdfindir()">PDF İndir</button>
+<div id="loading">Yükleniyor...</div>
+<textarea id="cikti" rows="15"></textarea>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const apiKey="BURAYA_API_ANAHTARIN";
+
+async function olustur(){
+loading.style.display="block";
+try{
+const r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent",{
+method:"POST",
+headers:{"Content-Type":"application/json","x-goog-api-key":apiKey},
+body:JSON.stringify({contents:[{parts:[{text:girdi.value}]}]})
+});
+const d=await r.json();
+cikti.value=d.candidates?.[0]?.content?.parts?.[0]?.text || "Yanıt alınamadı";
+localStorage.setItem(Date.now(),cikti.value);
+}catch(e){alert("Hata oluştu");}
+loading.style.display="none";
+}
+
+function kopyala(){navigator.clipboard.writeText(cikti.value);}
+function temizle(){girdi.value="";cikti.value="";}
+function tema(){document.body.classList.toggle("dark");}
+function pdfindir(){
+const {jsPDF}=window.jspdf;
+let doc=new jsPDF();
+doc.text(cikti.value,10,10);
+doc.save("belge.pdf");
+}
+</script>
+</body>
+</html>
