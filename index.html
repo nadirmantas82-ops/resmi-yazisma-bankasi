@@ -56,7 +56,8 @@ parts:[
 })
 });
 const d=await r.json();
-cikti.value=d.candidates?.[0]?.content?.parts?.[0]?.text || "Yanıt alınamadı";
+cikti.value = d.candidates?.[0]?.content?.parts?.[0]?.text
+           || JSON.stringify(d, null, 2);
 localStorage.setItem(Date.now(),cikti.value);
 }catch(e){alert("Hata oluştu");}
 loading.style.display="none";
